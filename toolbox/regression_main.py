@@ -10,28 +10,7 @@ from sklearn.metrics import mean_squared_error
 import argparse
 from sklearn.decomposition import PCA
 from Regression import Regression
-
-# def do_linear_regression(X, y, X_test, y_test, k_fold):
-#     # Define the model
-#     model = LinearRegression()
-#     cv_scores = cross_val_score(model, X, y, cv=k_fold)
-#     print("Cross-Validation Scores:", cv_scores)
-#     model.fit(X, y)
-#     test_score = model.score(X_test, y_test)
-#     y_pred_test = model.predict(X_test)
-#     test_mse = mean_squared_error(y_test, y_pred_test)
-#     return y_pred_test, test_mse, test_score
-
-# def do_regression(regression_method, ):
-#     if (regression_method == "linear"):
-#         model = do_linear_regression(X, y, x_test)
-#     elif (regression_method == "poly"):
-#         model = PolynomialFeatures(degree=degree)
-#     elif (regression_method == "gaussian"):
-#         model = GaussianProcessRegressor(kernel=kernel, alpha=alpha, n_restarts_optimizer=5)
-#     elif (regression_method == "svr"):
-#         model = SVR()
-#     return model
+import os
 
 def get_norm_method(norm_name):
     if (norm_name == "minmax"):
@@ -138,6 +117,12 @@ if __name__ == '__main__':
         help="number of trails",
     )
 
+    parser.add_argument(
+        "--output_path",
+        required=True,
+        help="output path",
+    )
+
     args = parser.parse_args()
     
     X_path = args.input_X_path
@@ -150,6 +135,7 @@ if __name__ == '__main__':
     fold = args.fold
     regression_method = args.regression_method
     kernal_function = args.kernal_function
+    output_path = args.output_path
     print()
     print("===================================================")
     print("Finished parsing arguments")
@@ -162,15 +148,12 @@ if __name__ == '__main__':
     print("dataset name:", dataset_name)
     print("number of k fold:", k_fold)
     print("doing repeat:", fold)
+    print("output path:", output_path)
+    
 
     norm_method = get_norm_method(norm_name)
 
-    
-    # num_train = 53
-    # norm_method = StandardScaler()
-    # X_path = "/Users/zimenglyu/Documents/datasets/microbeam/PPM/combined/Cyclone_10_202303_202105_202209_lab_results_spectra.csv"
     X_data = pd.read_csv(X_path)
-    # y_path = "/Users/zimenglyu/Documents/datasets/microbeam/PPM/combined/Cyclone_10_202303_202105_202209_lab_results.csv"
     y_data = pd.read_csv(y_path)
     datetime = y_data['DateTime']
     scaler_X = norm_method
@@ -192,16 +175,13 @@ if __name__ == '__main__':
         y_scaled = scaler_y.fit_transform(y_data[[col]])
         y = y_scaled[:num_train, :]
         y_test = y_scaled[num_train:, :]
-
         y_pred_test, test_score = regressor.do_regression(X, y, X_test, y_test)
-
         y_all = np.append(y,y_pred_test)
-
         pred_result[[col]] = scaler_y.inverse_transform(y_all.reshape(-1, 1))
     # Save the predicted results to a CSV file
     if (regression_method == "gaussian"):
-        filename = "results/" + regression_method + "/" + dataset_name + "_" + kernal_function + "_" + norm_name + "_" + fold + ".csv"
+        filename =  dataset_name + "_" + kernal_function + "_" + norm_name + "_" + fold + ".csv"
     else:
-        filename = "results/" + regression_method + "/" + dataset_name + "_" + regression_method + "_" + norm_name + "_" + fold + ".csv"
+        filename =  dataset_name + "_" + regression_method + "_" + norm_name + "_" + fold + ".csv"
 
-    pred_result.to_csv(filename, index=False)
+    pred_result.to_csv(os.path.join(output_path, filename), index=False)

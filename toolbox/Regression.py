@@ -46,7 +46,7 @@ class Regression:
         best_degree = None
         best_score = -np.inf
         
-        for degree in range(1, 7):
+        for degree in range(1, 11):
             poly_features = PolynomialFeatures(degree=degree)
             X_poly = poly_features.fit_transform(X)
 
