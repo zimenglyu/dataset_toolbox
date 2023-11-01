@@ -11,15 +11,15 @@ if __name__ == '__main__':
     # file2 = "/Users/zimenglyu/Documents/datasets/microbeam/PPM/2023-03/spectra_March_2023_10.csv"
     # save_name = "/Users/zimenglyu/Documents/datasets/microbeam/PPM/2023-03/Lab_Data_March_2023_cyclone_10.csv"
 
-    file1 = "/Users/zimenglyu/Documents/datasets/microbeam/PPM/combined/Cyclone_10_202303_202105_202209_CT.csv"
-    file2 = "/Users/zimenglyu/Documents/datasets/microbeam/PPM/combined/Cyclone_10_202303_202105_202209_lab_results.csv"
-    save_name = "/Users/zimenglyu/Documents/datasets/microbeam/PPM/combined/Cyclone_10_202303_202105_202209_lab_results_new.csv"
+    file2 = "/Users/zimenglyu/Documents/datasets/microbeam/PPM/combined/cyclone_10/MTI_IDs_10.csv"
+    file1 = "/Users/zimenglyu/Documents/datasets/microbeam/PPM/combined/cyclone_10/Cyclone_10_202303_202105_202209_lab_results.csv"
+    save_name = "/Users/zimenglyu/Documents/datasets/microbeam/PPM/combined/cyclone_10/MTI_IDs_10_merged.csv"
 
     df1 = pd.read_csv(file1, parse_dates=["DateTime"], index_col="DateTime")
     df2 = pd.read_csv(file2, parse_dates=["DateTime"], index_col="DateTime")
     
     column_name = "CycloneNumber"
-    condition = 10
+    condition = 3
 
     df = join_by_date(df1, df2)
     # df = match_conditions(df, column_name, condition)

@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 
 # Load true observations
-obs = pd.read_csv('/Users/zimenglyu/Documents/datasets/microbeam/PPM/combined/Cyclone_10_202303_202105_202209_lab_results.csv')
+obs = pd.read_csv('/Users/zimenglyu/Documents/datasets/microbeam/PPM/combined/cyclone_3/Cyclone_3_combined_lab_results.csv')
 
 # File name prefix and suffix
-file_prefix = '/Users/zimenglyu/Documents/code/git/dataset_toolbox/toolbox/results/random/combined_2021-2023_random_'
+file_prefix = '/Users/zimenglyu/Documents/code/git/dataset_toolbox/toolbox/results/random_cyclone_3/combined_2021-2023_random_'
 file_suffix = '.csv'
 
 for method in ["uniform", "normal"]:

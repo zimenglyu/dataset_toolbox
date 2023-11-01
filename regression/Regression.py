@@ -46,7 +46,7 @@ class Regression:
         best_degree = None
         best_score = -np.inf
         
-        for degree in range(1, 11):
+        for degree in range(1, 5):
             poly_features = PolynomialFeatures(degree=degree)
             X_poly = poly_features.fit_transform(X)
 
@@ -73,24 +73,25 @@ class Regression:
         y_pred_test = best_model.predict(X_test_poly)
         return y_pred_test, best_score
     
-    # def create_dnn_model(self):
-    #     model = Sequential()
-    #     model.add(Dense(1024, input_dim=503, activation='relu'))
-    #     model.add(Dense(512, activation='relu'))
-    #     model.add(Dense(256, activation='relu'))
-    #     model.add(Dense(1))
-        
-    #     model.compile(loss='mean_squared_error', optimizer='adam')
-    #     return model
     def create_dnn_model(self):
         model = Sequential()
-        # model.add(Dense(1024, input_dim=503, activation='relu'))
-        model.add(Dense(20, input_dim=20, activation='relu'))
+        model.add(Dense(27, input_dim=27, activation='relu'))
+        # model.add(Dense(30, activation='relu'))
+        model.add(Dense(15, activation='relu'))
         model.add(Dense(10, activation='relu'))
         model.add(Dense(1))
         
         model.compile(loss='mean_squared_error', optimizer='adam')
         return model
+    # def create_dnn_model(self):
+    #     model = Sequential()
+    #     model.add(Dense(40, input_dim=32, activation='relu'))
+    #     model.add(Dense(20,  activation='relu'))
+    #     model.add(Dense(10, activation='relu'))
+    #     model.add(Dense(1))
+        
+    #     model.compile(loss='mean_squared_error', optimizer='adam')
+    #     return model
     
     def do_dnn(self, X, y, X_test, y_test):
         k = 5

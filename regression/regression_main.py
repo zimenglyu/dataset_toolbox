@@ -4,7 +4,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler, RobustScaler
 # from gaussian_process import
 from sklearn.metrics import mean_squared_error
 import argparse
@@ -17,6 +17,8 @@ def get_norm_method(norm_name):
         norm_method = MinMaxScaler()
     elif (norm_name == "standard"):
         norm_method = StandardScaler()
+    elif (norm_name == "robust"):
+        norm_method = RobustScaler()
     return norm_method
 
 def do_pca(X, portion=0.8):
@@ -184,4 +186,4 @@ if __name__ == '__main__':
     else:
         filename =  dataset_name + "_" + regression_method + "_" + norm_name + "_" + fold + ".csv"
 
-    pred_result.to_csv(os.path.join(output_path, filename), index=False)
+    pred_result.to_csv(os.path.join(output_path, filename))
