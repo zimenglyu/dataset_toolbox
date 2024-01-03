@@ -9,7 +9,7 @@ file_size = 200
 num_train = int(file_size * 0.8)
 print("num_train: ", num_train)
 # file_path = "/Users/zimenglyu/Documents/code/git/susi/SOM_energy_50/energy"
-file_path = f'/Users/zimenglyu/Documents/code/git/dataset_toolbox/regression/results_energy_{file_size}/pca_1'
+file_path = f'/Users/zimenglyu/Documents/code/git/dataset_toolbox/regression/results_energy_{file_size}/pca_0.8'
 sample = pd.read_csv("/Users/zimenglyu/Documents/datasets/regression/50/energydata_0_label.csv", index_col=0)
 print("sample columns:")
 print(sample.columns)
@@ -18,7 +18,9 @@ gpr_methods = [ "RBF", "Matern"]
 # for n in [30]:
 #     for nei in [7]:
 #         print("--------------------------------------")
-for regression_method in ["linear", "poly", "dnn", "gaussian", "gaussian"]:
+# for regression_method in ["linear", "poly", "dnn", "gaussian", "gaussian"]:
+for regression_method in ["knn"]:
+
     if (regression_method != "gaussian"):
         method = regression_method
     else:
@@ -30,11 +32,11 @@ for regression_method in ["linear", "poly", "dnn", "gaussian", "gaussian"]:
         print("doing for norm: ", norm)
         i=0
         mse_df = pd.DataFrame(columns=sample.columns)
-        for file in range(10):
+        for file in range(1,10):
             label_path = f'/Users/zimenglyu/Documents/datasets/regression/{file_size}/energydata_{file}_label.csv'
             obs = pd.read_csv(label_path, index_col=0)
             # obs = obs.drop(obs.columns[0], axis=1)
-            for fold in range(10):
+            for fold in range(5):
                 filename = os.path.join(file_path, f'{regression_method}/{file}/combined_{method}_{norm}_{fold}.csv')
                 # filename =  f'{file_path}_{fold}.csv'
 

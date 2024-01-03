@@ -3,7 +3,7 @@
 # regression=linear
 # regression=poly 
 # regression=gaussian
-regression=dnn
+regression=knn
 
 kernal=RBF
 kernal=Matern
@@ -22,7 +22,7 @@ gaussian_num_trails=100
 fold=0
 
 
-for pca_level in 1
+for pca_level in 0.8
 do
     for file in 1 2 3 4 5 6 7 8 9
     do
@@ -38,7 +38,7 @@ do
         do
             for kernal in RBF
             do
-                for fold in 0
+                for fold in 0 1 2 3 4 
                 do
                     train_file="$input_path/$file_length/energydata_${file}.csv"
                     train_label="$input_path/$file_length/energydata_${file}_label.csv"

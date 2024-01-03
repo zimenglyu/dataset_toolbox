@@ -1,7 +1,10 @@
-regression=linear
+# regression=linear
 # regression=poly
 # regression=gaussian
 # regression=dnn
+regression=knn
+regression=k-nei
+regression=dpmm
 
 kernal=RBF
 kernal=Matern
@@ -17,7 +20,7 @@ gaussian_num_trails=100
 fold=0
 
 
-for pca_level in 0.8 0.9 
+for pca_level in 0.8  
 do
     folder_name="results_NEW/$pca_level/$regression"  # Specify the folder path here
     if [ ! -d "$folder_name" ]; then
@@ -27,9 +30,9 @@ do
     echo "Folder already exists: $folder_name"
     fi
 
-    for norm in robust
+    for norm in minmax standard robust
     do
-        for kernal in RBF Matern
+        for kernal in RBF 
         do
             for fold in 0 1 2 3 4 5 6 7 8 9
             do

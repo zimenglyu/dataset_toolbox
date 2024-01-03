@@ -4,19 +4,21 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, Matern, RationalQuadratic, ExpSineSquared, WhiteKernel, ConstantKernel as C
 from sklearn.model_selection import LeaveOneOut, cross_val_score
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error
 import optuna
+import pymc3 as pm
 from sklearn.model_selection import KFold
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.callbacks import EarlyStopping
-
-
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
 
 class Regression:
     def __init__(self, regression_type, kwargs):
-        if regression_type not in ["linear", "poly", "gaussian", "dnn"]:
-            raise ValueError("Invalid regression type. Valid options are 'linear', 'poly', 'dnn', and 'gaussian'.")
+        if regression_type not in ["linear", "poly", "gaussian", "dnn", "knn", "k-nei", "dbscan", "dpmm"]:
+            raise ValueError("Invalid regression type. Valid options are 'linear', 'poly', 'dnn','dpmm', 'knn', 'k-nei', 'dbscan', and 'gaussian'.")
         self.regression_type = regression_type
         self.kwargs = kwargs
     
@@ -29,6 +31,139 @@ class Regression:
             return self.do_gaussian_regression(X, y, X_test, y_test)
         elif self.regression_type == "dnn":
             return self.do_dnn(X, y, X_test, y_test)
+        elif self.regression_type == "knn":
+            return self.do_knn(X, y, X_test, y_test)
+        elif self.regression_type == "k-nei":
+            return self.kmeans_regression(X, y, X_test, y_test)
+        elif self.regression_type == "dpmm":
+            return self.dpmm_regression(X, y, X_test, y_test)
+        
+    def dpmm_regression(self, X, y, X_test, y_test):
+        # Sample data: X (features) and y (target)
+        # Replace these with your actual data
+
+        # DPMM Model
+        with pm.Model() as model:
+            # Priors for unknown model parameters
+            alpha = pm.Gamma('alpha', 1., 1.)
+            beta = pm.Normal('beta', 0, sd=10, shape=(2,))
+            sigma = pm.HalfNormal('sigma', sd=1)
+
+            # Latent variable for mixture component
+            component = pm.DirichletProcess('component', alpha, pm.Normal.dist(0, sd=10), shape=len(X))
+
+            # Regression model for each component
+            mu = pm.Deterministic('mu', beta[0] + beta[1] * X.squeeze())
+
+            # Likelihood (sampling distribution) of observations
+            Y_obs = pm.Normal('Y_obs', mu=mu, sd=sigma, observed=y)
+
+            # Inference
+            trace = pm.sample(1000)
+        # Assuming 'model' is your trained PyMC3 model and 'trace' is the trace from the model training
+        # Define new data points for which you want to make predictions
+        # X_new = np.array([...])  # Replace with new data points
+
+        with model:
+            # Update the model with new data
+            # Assume 'X_shared' is a theano shared variable used for the input data in your model
+            # If you haven't used a shared variable, you'll need to modify the model to accommodate new data
+            # X_shared.set_value(X_test)
+
+            # Sample from the posterior predictive distribution for new data
+            posterior_predictive = pm.sample_posterior_predictive(trace, var_names=['Y_obs'], samples=1000)
+
+        # Extract the predictive mean for each new data point
+        predicted_means = np.mean(posterior_predictive['Y_obs'], axis=0)
+
+        # Alternatively, you can keep the entire distribution for each point to represent the uncertainty
+        predicted_distributions = posterior_predictive['Y_obs']
+
+        # Print or return the predictions
+        print("Predicted means:", predicted_means)
+
+        return predicted_means, 1
+
+
+
+    def kmeans_regression(self, X, y, X_test, y_test):
+        print("doing k-fold regression")
+        n_clusters = 20
+        # Step 1: K-means Clustering
+        kmeans = KMeans(n_clusters=n_clusters)
+        clusters = kmeans.fit_predict(X)
+
+        # Step 2: K-fold Cross Validation
+        kf = KFold(n_splits=5)
+        scores = []
+        models = []
+        
+        for train_index, test_index in kf.split(X):
+            print("traing index", train_index)
+            print("test index,", test_index)
+            X_train, Xtest = X[train_index], X[test_index]
+            y_train, ytest = y[train_index], y[test_index]
+            cluster_models = []
+            predictions = np.zeros_like(ytest)
+
+            for cluster in range(n_clusters):
+                # Apply regression within each cluster
+                cluster_train_index = (clusters[train_index] == cluster)
+                cluster_test_index = (clusters[test_index] == cluster)
+                
+                reg = LinearRegression()
+                reg.fit(X_train[cluster_train_index], y_train[cluster_train_index])
+                predictions[cluster_test_index] = reg.predict(Xtest[cluster_test_index])
+                cluster_models.append(reg)
+
+            score = mean_squared_error(y_test, predictions, squared=False)  # RMSE
+            scores.append(score)
+            models.append(cluster_models)
+
+        # Step 3: Choose the best model based on average score
+        best_index = np.argmin(scores)
+        best_models = models[best_index]
+
+        # Step 4: Function to make predictions using the best models
+        def predict(X_test):
+            clusters_new = kmeans.predict(X_test)
+            predictions_new = np.zeros(len(X_test))
+
+            for cluster, model in enumerate(best_models):
+                cluster_index = (clusters_new == cluster)
+                predictions_new[cluster_index] = model.predict(X_test[cluster_index])
+
+            return predictions_new
+
+        return predict, np.min(scores)
+
+
+        # return best_predictions, 1
+
+
+    def do_knn(self, X, y, X_test, y_test):
+        neighbor_values = range(1, 10)
+
+        # Perform k-Fold Cross-Validation for each n_neighbors and record the average score
+        kf = KFold(n_splits=5, shuffle=True, random_state=42)
+        avg_scores = {}
+
+        for n in neighbor_values:
+            knn = KNeighborsRegressor(n_neighbors=n)
+            cv_scores = cross_val_score(knn, X, y, cv=kf)
+            avg_scores[n] = np.mean(cv_scores)
+
+        # Find the best n_neighbors value and its score
+        best_n = max(avg_scores, key=avg_scores.get)
+        best_score = avg_scores[best_n]
+
+        # Train the model with the best n_neighbors
+        best_knn = KNeighborsRegressor(n_neighbors=best_n)
+        best_knn.fit(X, y)
+
+        # Making predictions on the test set
+        y_pred_test = best_knn.predict(X_test)
+        return y_pred_test, best_score
 
     def do_linear_regresion(self, X, y, X_test, y_test):
         model = LinearRegression()
