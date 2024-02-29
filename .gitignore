@@ -1,5 +1,4 @@
-        .DS_Store
-        toolbox/.DS_Store
-        toolbox/__pycache__/
-        *.png
-        
+.DS_Store
+toolbox/.DS_Store
+toolbox/__pycache__/
+*.png
