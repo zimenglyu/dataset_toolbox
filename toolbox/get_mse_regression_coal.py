@@ -20,7 +20,7 @@ gpr_methods = [ "RBF", "Matern"]
 #     for nei in [7]:
 #         print("--------------------------------------")
 # for regression_method in ["linear", "poly", "dnn", "gaussian", "gaussian"]:
-for regression_method in ["k-nei"]:
+for regression_method in ["knn"]:
     if (regression_method != "gaussian"):
         method = regression_method
     else:

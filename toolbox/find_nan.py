@@ -9,7 +9,7 @@ def find_nan(df):
     # return new_df
 
 if __name__ == '__main__':
-    file_name = "/Users/zimenglyu/Documents/datasets/microbeam/PPM/combined/cyclone_3/Cyclone_3_combined_spectra.csv"
+    file_name = "/Users/zimenglyu/Documents/datasets/SOM_flight/flight_53438_labelled_5.csv"
     save_name = "/Users/zimenglyu/Documents/datasets/microbeam/PPM/combined/cyclone_3/Cyclone_3_combined_spectra.csv"
     df = pd.read_csv(file_name)
     # print(df)
